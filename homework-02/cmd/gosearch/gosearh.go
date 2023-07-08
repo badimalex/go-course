@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
+	"search/pkg/crawler"
 	"search/pkg/crawler/spider"
 	"strings"
 )
@@ -14,16 +14,13 @@ func main() {
 
 	scanner := spider.New()
 
-	data1, err := scanner.Scan("https://go.dev", 2)
-	if err != nil {
-		log.Fatal(err)
-	}
+	links := []string{"https://go.dev", "https://golang.org"}
+	var data []crawler.Document
 
-	data2, err := scanner.Scan("https://golang.org", 2)
-	if err != nil {
-		log.Fatal(err)
+	for _, link := range links {
+		site, _ := scanner.Scan(link, 2)
+		data = append(data, site...)
 	}
-	data := append(data1, data2...)
 
 	if *searchWord != "" {
 		fmt.Printf("Search results for '%s':\n", *searchWord)
