@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"search/pkg/crawler"
-	"search/pkg/crawler/spider"
+	"go-course/homework-02/pkg/crawler"
+	"go-course/homework-02/pkg/crawler/spider"
 	"strings"
 )
 
