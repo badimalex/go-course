@@ -3,8 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"go-course/homework-02/pkg/crawler"
-	"go-course/homework-02/pkg/crawler/spider"
+	"go-course/homework-03/pkg/crawler"
+	"go-course/homework-03/pkg/crawler/spider"
+	"go-course/homework-03/pkg/index"
 	"strings"
 )
 
@@ -21,6 +22,13 @@ func main() {
 		site, _ := scanner.Scan(link, 2)
 		data = append(data, site...)
 	}
+
+	index := index.New()
+	for _, doc := range data {
+		index.AddDocument(doc.ID, doc.Title)
+	}
+
+	fmt.Println(index)
 
 	if *searchWord != "" {
 		fmt.Printf("Search results for '%s':\n", *searchWord)
