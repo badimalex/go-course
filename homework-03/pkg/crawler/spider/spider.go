@@ -3,8 +3,10 @@
 package spider
 
 import (
+	"math/rand"
 	"net/http"
 	"strings"
+	"time"
 
 	"go-course/homework-03/pkg/crawler"
 
@@ -20,7 +22,13 @@ func New() *Service {
 	return &s
 }
 
-var docCounter int
+func generateID() int {
+	rand.Seed(time.Now().UnixNano())
+
+	id := rand.Intn(1000) + 1
+
+	return id
+}
 
 // Scan осуществляет рекурсивный обход ссылок сайта, указанного в URL,
 // с учётом глубины перехода по ссылкам, переданной в depth.
@@ -30,9 +38,8 @@ func (s *Service) Scan(url string, depth int) (data []crawler.Document, err erro
 	parse(url, url, depth, pages)
 
 	for url, title := range pages {
-		docCounter++
 		item := crawler.Document{
-			ID:    docCounter,
+			ID:    generateID(),
 			URL:   url,
 			Title: title,
 		}
