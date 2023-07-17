@@ -28,17 +28,9 @@ func main() {
 		index.AddDocument(doc.ID, doc.Title)
 	}
 
-	fmt.Println(index)
-
 	if *searchWord != "" {
 		fmt.Printf("Search results for '%s':\n", *searchWord)
-		for _, doc := range data {
-			if strings.Contains(strings.ToLower(doc.Title), strings.ToLower(*searchWord)) {
-				fmt.Printf("URL: %s\n", doc.URL)
-				fmt.Printf("Title: %s\n", doc.Title)
-				fmt.Println()
-			}
-		}
+		fmt.Println(index.Search(strings.ToLower(*searchWord)))
 	} else {
 		fmt.Println("No search word provided.")
 	}

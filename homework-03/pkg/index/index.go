@@ -1,6 +1,8 @@
 package index
 
-import "strings"
+import (
+	"strings"
+)
 
 type Index struct {
 	index map[string][]int
@@ -17,4 +19,8 @@ func (i *Index) AddDocument(docID int, content string) {
 	for _, word := range words {
 		i.index[word] = append(i.index[word], docID)
 	}
+}
+
+func (i *Index) Search(word string) []int {
+	return i.index[word]
 }
