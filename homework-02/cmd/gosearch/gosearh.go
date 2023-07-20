@@ -18,7 +18,11 @@ func main() {
 	var data []crawler.Document
 
 	for _, link := range links {
-		site, _ := scanner.Scan(link, 2)
+		site, err := scanner.Scan(link, 2)
+		if err != nil {
+			fmt.Println("Error scanning link:", err)
+			continue
+		}
 		data = append(data, site...)
 	}
 
