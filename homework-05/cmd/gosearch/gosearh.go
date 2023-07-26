@@ -63,22 +63,12 @@ func main() {
 		idx.AddDocument(doc.ID, doc.Title)
 	}
 
-	sort.Slice(data, func(i, j int) bool {
-		return data[i].ID < data[j].ID
-	})
+	sortData(data)
 
 	if *searchWord != "" {
 		fmt.Printf("Search results for '%s':\n", *searchWord)
 		results := idx.Search(strings.ToLower(*searchWord))
-
-		for _, id := range results {
-			i := binSearch(data, id)
-			if i == -1 {
-				fmt.Println("Document not found for ID:", id)
-			} else {
-				fmt.Println(data[i].URL, data[i].Title)
-			}
-		}
+		print(results, data)
 	} else {
 		fmt.Println("No search word provided.")
 	}
@@ -114,6 +104,12 @@ func saveData(data []crawler.Document, writer io.Writer) error {
 	return err
 }
 
+func sortData(data []crawler.Document) {
+	sort.Slice(data, func(i, j int) bool {
+		return data[i].ID < data[j].ID
+	})
+}
+
 func binSearch(arr []crawler.Document, target int) int {
 	l := 0
 	r := len(arr) - 1
@@ -133,4 +129,15 @@ func binSearch(arr []crawler.Document, target int) int {
 	}
 
 	return -1
+}
+
+func print(results []int, data []crawler.Document) {
+	for _, id := range results {
+		i := binSearch(data, id)
+		if i == -1 {
+			fmt.Println("Document not found for ID:", id)
+		} else {
+			fmt.Println(data[i].URL, data[i].Title)
+		}
+	}
 }
