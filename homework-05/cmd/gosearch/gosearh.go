@@ -8,6 +8,7 @@ import (
 	"go-course/homework-05/pkg/crawler/spider"
 	"go-course/homework-05/pkg/index"
 	"io"
+	"log"
 	"os"
 	"sort"
 	"strings"
@@ -27,37 +28,39 @@ func main() {
 	if fileExists(dataFile) {
 		file, err := os.Open(dataFile)
 		if err != nil {
-			panic(err)
+			log.Fatalf("error opening data file: %v", err)
 		}
 		defer file.Close()
 
 		data, err = loadDataFromFile(file)
 		if err != nil {
-			panic(err)
+			log.Fatalf("error loading data from file: %v", err)
 		}
 	} else {
 		for _, link := range links {
 			site, err := scanner.Scan(link, 2)
 			if err != nil {
-				fmt.Println("Error scanning link:", err)
+				fmt.Println("error scanning link:", err)
 				continue
 			}
 			data = append(data, site...)
 		}
 	}
+
 	file, err := os.Create(dataFile)
 	if err != nil {
-		panic(err)
+		log.Fatalf("error creating data file: %v", err)
 	}
 	defer file.Close()
 
 	err = saveDataToFile(data, file)
 	if err != nil {
-		panic(err)
+		log.Fatalf("error saving data to file: %v", err)
 	}
-	index := index.New()
+
+	idx := index.New()
 	for _, doc := range data {
-		index.AddDocument(doc.ID, doc.Title)
+		idx.AddDocument(doc.ID, doc.Title)
 	}
 
 	sort.Slice(data, func(i, j int) bool {
@@ -66,11 +69,15 @@ func main() {
 
 	if *searchWord != "" {
 		fmt.Printf("Search results for '%s':\n", *searchWord)
-		results := index.Search(strings.ToLower(*searchWord))
+		results := idx.Search(strings.ToLower(*searchWord))
 
 		for _, id := range results {
 			i := BinarySearch(data, id)
-			fmt.Println(data[i].URL, data[i].Title)
+			if i == -1 {
+				fmt.Println("Document not found for ID:", id)
+			} else {
+				fmt.Println(data[i].URL, data[i].Title)
+			}
 		}
 	} else {
 		fmt.Println("No search word provided.")
@@ -120,9 +127,7 @@ func BinarySearch(arr []crawler.Document, target int) int {
 
 		if target < arr[mid].ID {
 			r = mid - 1
-		}
-
-		if target > arr[mid].ID {
+		} else {
 			l = mid + 1
 		}
 	}
