@@ -68,7 +68,7 @@ func main() {
 	if *searchWord != "" {
 		fmt.Printf("Search results for '%s':\n", *searchWord)
 		results := idx.Search(strings.ToLower(*searchWord))
-		print(results, data)
+		printResults(results, data)
 	} else {
 		fmt.Println("No search word provided.")
 	}
@@ -131,7 +131,7 @@ func binSearch(arr []crawler.Document, target int) int {
 	return -1
 }
 
-func print(results []int, data []crawler.Document) {
+func printResults(results []int, data []crawler.Document) {
 	for _, id := range results {
 		i := binSearch(data, id)
 		if i == -1 {
