@@ -25,14 +25,14 @@ func main() {
 	links := []string{"https://go.dev", "https://golang.org"}
 	var data []crawler.Document
 
-	if fileExists(dataFile) {
+	if exists(dataFile) {
 		file, err := os.Open(dataFile)
 		if err != nil {
 			log.Fatalf("error opening data file: %v", err)
 		}
 		defer file.Close()
 
-		data, err = loadDataFromFile(file)
+		data, err = loadData(file)
 		if err != nil {
 			log.Fatalf("error loading data from file: %v", err)
 		}
@@ -53,7 +53,7 @@ func main() {
 	}
 	defer file.Close()
 
-	err = saveDataToFile(data, file)
+	err = saveData(data, file)
 	if err != nil {
 		log.Fatalf("error saving data to file: %v", err)
 	}
@@ -72,7 +72,7 @@ func main() {
 		results := idx.Search(strings.ToLower(*searchWord))
 
 		for _, id := range results {
-			i := BinarySearch(data, id)
+			i := binSearch(data, id)
 			if i == -1 {
 				fmt.Println("Document not found for ID:", id)
 			} else {
@@ -84,12 +84,12 @@ func main() {
 	}
 }
 
-func fileExists(filename string) bool {
+func exists(filename string) bool {
 	_, err := os.Stat(filename)
 	return err == nil
 }
 
-func loadDataFromFile(reader io.Reader) ([]crawler.Document, error) {
+func loadData(reader io.Reader) ([]crawler.Document, error) {
 	jsonData, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ func loadDataFromFile(reader io.Reader) ([]crawler.Document, error) {
 	return data, nil
 }
 
-func saveDataToFile(data []crawler.Document, writer io.Writer) error {
+func saveData(data []crawler.Document, writer io.Writer) error {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return err
@@ -114,7 +114,7 @@ func saveDataToFile(data []crawler.Document, writer io.Writer) error {
 	return err
 }
 
-func BinarySearch(arr []crawler.Document, target int) int {
+func binSearch(arr []crawler.Document, target int) int {
 	l := 0
 	r := len(arr) - 1
 
