@@ -25,7 +25,8 @@ func main() {
 	links := []string{"https://go.dev", "https://golang.org"}
 	var data []crawler.Document
 
-	if exists(dataFile) {
+	_, err := os.Stat(dataFile)
+	if err == nil {
 		file, err := os.Open(dataFile)
 		if err != nil {
 			log.Fatalf("error opening data file: %v", err)
@@ -72,11 +73,6 @@ func main() {
 	} else {
 		fmt.Println("No search word provided.")
 	}
-}
-
-func exists(filename string) bool {
-	_, err := os.Stat(filename)
-	return err == nil
 }
 
 func loadData(reader io.Reader) ([]crawler.Document, error) {
