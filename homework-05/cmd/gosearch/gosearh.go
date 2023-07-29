@@ -46,17 +46,17 @@ func main() {
 			}
 			data = append(data, site...)
 		}
-	}
 
-	file, err := os.Create(dataFile)
-	if err != nil {
-		log.Fatalf("error creating data file: %v", err)
-	}
-	defer file.Close()
+		file, err := os.Create(dataFile)
+		if err != nil {
+			log.Fatalf("error creating data file: %v", err)
+		}
+		defer file.Close()
 
-	err = saveData(data, file)
-	if err != nil {
-		log.Fatalf("error saving data to file: %v", err)
+		err = saveData(data, file)
+		if err != nil {
+			log.Fatalf("error saving data to file: %v", err)
+		}
 	}
 
 	idx := index.New()
