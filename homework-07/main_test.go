@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sort"
 	"testing"
 )
 
@@ -49,5 +50,19 @@ func Test_sortString(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func BenchmarkSortInts(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		s := []int{9, 8, 5}
+		sort.Ints(s)
+	}
+}
+
+func BenchmarkSortFloat64s(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		s := []float64{9.1, 8, 5}
+		sort.Float64s(s)
 	}
 }
