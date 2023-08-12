@@ -6,7 +6,7 @@ import (
 
 func Test_sortInts(t *testing.T) {
 	s := []int{9, 8, 5}
-	sortInts(s)
+	SortInts(s)
 	expected := []int{5, 8, 9}
 
 	for i := range expected {
@@ -41,7 +41,7 @@ func Test_sortString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sortString(tt.args)
+			SortString(tt.args)
 
 			for i := range tt.want {
 				if tt.args[i] != tt.want[i] {

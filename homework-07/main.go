@@ -2,10 +2,10 @@ package main
 
 import "sort"
 
-func sortInts(x []int) {
+func SortInts(x []int) {
 	sort.Ints(x)
 }
 
-func sortString(x []string) {
+func SortString(x []string) {
 	sort.Strings(x)
 }
