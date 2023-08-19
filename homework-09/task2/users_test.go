@@ -34,7 +34,7 @@ func TestMaxAge(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotValue := MaxAge(tt.people...); !reflect.DeepEqual(gotValue, tt.want) {
+			if gotValue := OldestPerson(tt.people...); !reflect.DeepEqual(gotValue, tt.want) {
 				t.Errorf("MaxAge() = %v, want %v", gotValue, tt.want)
 			}
 		})

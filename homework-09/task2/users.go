@@ -8,7 +8,7 @@ type Customer struct {
 	Age int
 }
 
-func MaxAge(people ...any) any {
+func OldestPerson(people ...any) any {
 	max := 0
 	var oldest any
 
