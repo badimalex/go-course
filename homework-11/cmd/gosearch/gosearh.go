@@ -66,7 +66,7 @@ func main() {
 	res := search.New(idx, data)
 	server := netsrv.New(res)
 
-	server.StartServer()
+	server.Start()
 }
 
 func loadData(reader io.Reader) ([]crawler.Document, error) {

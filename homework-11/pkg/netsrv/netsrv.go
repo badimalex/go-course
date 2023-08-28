@@ -39,7 +39,7 @@ func handler(conn net.Conn, search *search.Search) {
 	}
 }
 
-func (n *Netsrv) StartServer() {
+func (n *Netsrv) Start() {
 	ln, err := net.Listen("tcp", ":8000")
 	if err != nil {
 		log.Fatal(err)
