@@ -52,7 +52,9 @@ func TestDeleteMovie(t *testing.T) {
 	pg := &Postgres{conn: conn}
 
 	movieID := 1
+	mock.ExpectBegin()
 	mock.ExpectExec("DELETE FROM movies").WithArgs(movieID).WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
 
 	err := pg.DeleteMovie(movieID)
 	assert.NoError(t, err)
@@ -70,7 +72,9 @@ func TestUpdateMovie(t *testing.T) {
 		Rating:      "PG-13",
 	}
 
+	mock.ExpectBegin()
 	mock.ExpectExec("UPDATE movies").WithArgs(movie.Title, movie.ReleaseYear, movie.StudioID, movie.BoxOffice, movie.Rating, movie.ID).WillReturnResult(sqlmock.NewResult(1, 1))
+	mock.ExpectCommit()
 
 	err := pg.UpdateMovie(movie)
 	assert.NoError(t, err)

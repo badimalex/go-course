@@ -40,15 +40,35 @@ func (pg *Postgres) AddMovies(movies []db.Movie) error {
 }
 
 func (pg *Postgres) DeleteMovie(movieID int) error {
-	_, err := pg.conn.Exec("DELETE FROM movies WHERE id = $1", movieID)
-	return err
+	tx, err := pg.conn.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	_, err = pg.conn.Exec("DELETE FROM movies WHERE id = $1", movieID)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (pg *Postgres) UpdateMovie(movie db.Movie) error {
-	_, err := pg.conn.Exec(`
+	tx, err := pg.conn.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	_, err = pg.conn.Exec(`
         UPDATE movies SET title = $1, release_year = $2, studio_id = $3, box_office = $4, rating = $5 WHERE id = $6
     `, movie.Title, movie.ReleaseYear, movie.StudioID, movie.BoxOffice, movie.Rating, movie.ID)
-	return err
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (pg *Postgres) Movies(studioID int) ([]db.Movie, error) {
