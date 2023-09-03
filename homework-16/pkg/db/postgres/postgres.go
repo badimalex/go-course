@@ -51,7 +51,7 @@ func (pg *Postgres) UpdateMovie(movie db.Movie) error {
 	return err
 }
 
-func (pg *Postgres) GetMovies(studioID int) ([]db.Movie, error) {
+func (pg *Postgres) Movies(studioID int) ([]db.Movie, error) {
 	var rows *sql.Rows
 	var err error
 

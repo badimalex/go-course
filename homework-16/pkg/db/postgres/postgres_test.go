@@ -76,7 +76,7 @@ func TestUpdateMovie(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestGetMovies(t *testing.T) {
+func TestMovies(t *testing.T) {
 	pg := &Postgres{conn: conn}
 
 	rows := sqlmock.NewRows([]string{"id", "title", "release_year", "studio_id", "box_office", "rating"}).
@@ -84,7 +84,7 @@ func TestGetMovies(t *testing.T) {
 
 	mock.ExpectQuery("SELECT id, title, release_year, studio_id, box_office, rating FROM movies").WillReturnRows(rows)
 
-	movies, err := pg.GetMovies(0)
+	movies, err := pg.Movies(0)
 	assert.NoError(t, err)
 	assert.Len(t, movies, 1)
 	assert.Equal(t, "Test Movie", movies[0].Title)
