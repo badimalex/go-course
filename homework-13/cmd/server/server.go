@@ -17,7 +17,10 @@ import (
 const dataFile = "data.json"
 
 func main() {
-	data := initData()
+	data, err := initData()
+	if err != nil {
+		log.Fatalf("error initializing data: %v", err)
+	}
 
 	idx := index.New(data)
 	retriever := retriever.New(idx, data)
@@ -26,7 +29,7 @@ func main() {
 	api.Serve(":8080")
 }
 
-func initData() []crawler.Document {
+func initData() ([]crawler.Document, error) {
 	scanner := spider.New()
 
 	links := []string{"https://go.dev", "https://golang.org"}
@@ -36,13 +39,13 @@ func initData() []crawler.Document {
 	if err == nil {
 		file, err := os.Open(dataFile)
 		if err != nil {
-			log.Fatalf("error opening data file: %v", err)
+			return nil, fmt.Errorf("error opening data file: %v", err)
 		}
 		defer file.Close()
 
 		data, err = readJSON(file)
 		if err != nil {
-			log.Fatalf("error loading data from file: %v", err)
+			return nil, fmt.Errorf("error loading data from file: %v", err)
 		}
 	} else {
 		for _, link := range links {
@@ -56,19 +59,21 @@ func initData() []crawler.Document {
 
 		file, err := os.Create(dataFile)
 		if err != nil {
-			log.Fatalf("error creating data file: %v", err)
+			return nil, fmt.Errorf("error creating data file: %v", err)
 		}
 		defer file.Close()
 
 		err = saveData(data, file)
 		if err != nil {
-			log.Fatalf("error saving data to file: %v", err)
+			return nil, fmt.Errorf("error saving data to file: %v", err)
 		}
 	}
 
-	sortData(data)
+	sort.Slice(data, func(i, j int) bool {
+		return data[i].ID < data[j].ID
+	})
 
-	return data
+	return data, nil
 }
 
 func readJSON(reader io.Reader) ([]crawler.Document, error) {
@@ -94,10 +99,4 @@ func saveData(data []crawler.Document, writer io.Writer) error {
 
 	_, err = writer.Write(jsonData)
 	return err
-}
-
-func sortData(data []crawler.Document) {
-	sort.Slice(data, func(i, j int) bool {
-		return data[i].ID < data[j].ID
-	})
 }
