@@ -4,18 +4,22 @@ import (
 	"context"
 	"time"
 
-	"github.com/badimalex/go-course/lynks/shortener/pkg/urls"
-
 	"github.com/go-redis/redis/v8"
 )
 
 const expiryDuration = 24 * time.Hour
 
-type RedisStorage struct {
+type Data struct {
+	Short        string    `json:"shortUrl"`
+	Destination  string    `json:"destination"`
+	CreationTime time.Time `json:"-"`
+}
+
+type Storage struct {
 	client *redis.Client
 }
 
-func NewRedisStorage(addr string, password string, db int) (*RedisStorage, error) {
+func New(addr string, password string, db int) (*Storage, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     addr,
 		Password: password,
@@ -27,12 +31,12 @@ func NewRedisStorage(addr string, password string, db int) (*RedisStorage, error
 		return nil, err
 	}
 
-	return &RedisStorage{
+	return &Storage{
 		client: rdb,
 	}, nil
 }
 
-func (storage *RedisStorage) Save(urlData urls.Data) error {
+func (storage *Storage) Save(urlData Data) error {
 	err := storage.client.Set(context.Background(), urlData.Short, urlData.Destination, expiryDuration).Err()
 	if err != nil {
 		return err
@@ -43,15 +47,15 @@ func (storage *RedisStorage) Save(urlData urls.Data) error {
 	return nil
 }
 
-func (storage *RedisStorage) Load(shortURL string) (urls.Data, error) {
+func (storage *Storage) Load(shortURL string) (Data, error) {
 	destURL, err := storage.client.Get(context.Background(), shortURL).Result()
 	if err != nil {
-		return urls.Data{}, err
+		return Data{}, err
 	}
 
 	// Здесь нужно будет получить другие данные, если они сохраняются
 
-	return urls.Data{
+	return Data{
 		Short:       shortURL,
 		Destination: destURL,
 		// CreationTime: ..., // установите это, если сохраняете время создания

@@ -4,21 +4,19 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/badimalex/go-course/lynks/memcache/pkg/api"
 	"github.com/badimalex/go-course/lynks/memcache/pkg/redis"
-	"github.com/badimalex/go-course/lynks/shortener/pkg/api"
-	"github.com/badimalex/go-course/lynks/shortener/pkg/urls"
 
 	"github.com/gorilla/mux"
 )
 
 func main() {
-	redisStorage, err := redis.NewRedisStorage("localhost:6379", "", 0)
+	redisStorage, err := redis.New("localhost:6379", "", 0)
 	if err != nil {
 		log.Fatalf("Failed to initialize Redis storage: %v", err)
 	}
 
-	urls := urls.New(redisStorage)
-	api := api.New(urls, "http://localhost:8081/")
+	api := api.New(redisStorage)
 
 	r := mux.NewRouter()
 	api.Init(r)

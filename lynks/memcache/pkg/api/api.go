@@ -2,68 +2,67 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
-	"github.com/badimalex/go-course/lynks/shortener/pkg/urls"
-
+	"github.com/badimalex/go-course/lynks/memcache/pkg/redis"
 	"github.com/gorilla/mux"
 )
 
-type APIHandler struct {
-	urlService *urls.Service
-	root       string
+type Api struct {
+	redis *redis.Storage
 }
 
-func NewAPIHandler(urlService *urls.Service, root string) *APIHandler {
-	return &APIHandler{
-		urlService: urlService,
-		root:       root,
+func New(redis *redis.Storage) *Api {
+	return &Api{
+		redis: redis,
 	}
 }
 
-func (h *APIHandler) RegisterRoutes(r *mux.Router) {
-	r.HandleFunc("/", h.createShortURL).Methods("POST")
-	r.HandleFunc("/{shortURL}", h.redirectToURL).Methods("GET")
+func (h *Api) Init(r *mux.Router) {
+	r.HandleFunc("/", h.create).Methods("POST")
+	r.HandleFunc("/{short}", h.get).Methods("GET")
 }
 
-func (h *APIHandler) createShortURL(w http.ResponseWriter, r *http.Request) {
-	var requestData struct {
-		Destination string `json:"destination"`
+func (h *Api) create(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Dest  string `json:"destination"`
+		Short string `json:"short"`
 	}
 
-	err := json.NewDecoder(r.Body).Decode(&requestData)
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
+	data := redis.Data{Destination: req.Dest, Short: req.Short}
 
-	shortURL, err := h.urlService.Create(requestData.Destination)
+	err = h.redis.Save(data)
+	fmt.Println(data)
 	if err != nil {
 		http.Error(w, "Error creating short URL", http.StatusInternalServerError)
 		return
 	}
 
-	responseData := struct {
-		ShortURL    string `json:"shortUrl"`
-		Destination string `json:"destination"`
-	}{
-		ShortURL:    h.root + shortURL.Short,
-		Destination: requestData.Destination,
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(responseData)
 }
 
-func (h *APIHandler) redirectToURL(w http.ResponseWriter, r *http.Request) {
+func (h *Api) get(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	shortURL := vars["shortURL"]
+	short := vars["short"]
 
-	destination, err := h.urlService.Get(shortURL)
+	destination, err := h.redis.Load(short)
 	if err != nil {
 		http.Error(w, "URL not found", http.StatusNotFound)
 		return
 	}
 
-	http.Redirect(w, r, destination.Destination, http.StatusSeeOther)
+	resp := struct {
+		Destination string `json:"destination"`
+	}{
+		Destination: destination.Destination,
+	}
+	fmt.Println(resp)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
 }

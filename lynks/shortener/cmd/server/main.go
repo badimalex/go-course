@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/badimalex/go-course/lynks/shortener/pkg/api"
+	"github.com/badimalex/go-course/lynks/shortener/pkg/cache"
 	"github.com/badimalex/go-course/lynks/shortener/pkg/storage"
 	"github.com/badimalex/go-course/lynks/shortener/pkg/urls"
 
@@ -12,6 +13,8 @@ import (
 )
 
 const url = "postgres://dmitriybadichan:123@127.0.0.1/lynks?sslmode=disable"
+const root = "http://localhost:8080/"
+const cachePath = "http://localhost:8081/"
 
 func main() {
 	postgresStorage, err := storage.New(url)
@@ -25,11 +28,12 @@ func main() {
 	}
 
 	urlService := urls.New(postgresStorage)
-	apiHandler := api.New(urlService, "http://localhost:8080/")
+	cacheService := cache.New(cachePath)
+	apiHandler := api.New(urlService, cacheService, root)
 
 	r := mux.NewRouter()
 	apiHandler.Init(r)
 
-	log.Println("Server is running on http://localhost:8080")
+	log.Println("Server is running on ", root)
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

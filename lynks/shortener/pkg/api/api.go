@@ -4,20 +4,23 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/badimalex/go-course/lynks/shortener/pkg/cache"
 	"github.com/badimalex/go-course/lynks/shortener/pkg/urls"
 
 	"github.com/gorilla/mux"
 )
 
 type Api struct {
-	url  *urls.Service
-	root string
+	url   *urls.Service
+	cache *cache.Service
+	root  string
 }
 
-func New(urlService *urls.Service, root string) *Api {
+func New(urls *urls.Service, cache *cache.Service, root string) *Api {
 	return &Api{
-		url:  urlService,
-		root: root,
+		url:   urls,
+		cache: cache,
+		root:  root,
 	}
 }
 
@@ -43,6 +46,12 @@ func (h *Api) createShortURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = h.cache.Create(req.Dest, url.Short)
+	if err != nil {
+		http.Error(w, "Error saving to cache", http.StatusInternalServerError)
+		return
+	}
+
 	resp := struct {
 		ShortURL    string `json:"shortUrl"`
 		Destination string `json:"destination"`
@@ -59,11 +68,17 @@ func (h *Api) redirectToURL(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	short := vars["short"]
 
-	destination, err := h.url.Get(short)
+	c, err := h.cache.Get(short)
+	if err == nil {
+		http.Redirect(w, r, c.Destination, http.StatusSeeOther)
+		return
+	}
+
+	u, err := h.url.Get(short)
 	if err != nil {
 		http.Error(w, "URL not found", http.StatusNotFound)
 		return
 	}
 
-	http.Redirect(w, r, destination.Destination, http.StatusSeeOther)
+	http.Redirect(w, r, u.Destination, http.StatusSeeOther)
 }
