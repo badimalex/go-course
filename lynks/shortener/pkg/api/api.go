@@ -3,33 +3,39 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/badimalex/go-course/lynks/shortener/pkg/cache"
+	"github.com/badimalex/go-course/lynks/shortener/pkg/metrics"
 	"github.com/badimalex/go-course/lynks/shortener/pkg/urls"
+	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/gorilla/mux"
 )
 
 type Api struct {
-	url   *urls.Service
-	cache *cache.Service
-	root  string
+	url     *urls.Service
+	cache   *cache.Service
+	metrics *metrics.Metrics
+	root    string
 }
 
-func New(urls *urls.Service, cache *cache.Service, root string) *Api {
+func New(urls *urls.Service, cache *cache.Service, metrics *metrics.Metrics, root string) *Api {
 	return &Api{
-		url:   urls,
-		cache: cache,
-		root:  root,
+		url:     urls,
+		cache:   cache,
+		root:    root,
+		metrics: metrics,
 	}
 }
 
 func (h *Api) Init(r *mux.Router) {
-	r.HandleFunc("/", h.createShortURL).Methods("POST")
-	r.HandleFunc("/{short}", h.redirectToURL).Methods("GET")
+	r.HandleFunc("/", h.create).Methods("POST")
+	r.HandleFunc("/{short}", h.get).Methods("GET")
 }
 
-func (h *Api) createShortURL(w http.ResponseWriter, r *http.Request) {
+func (h *Api) create(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
 	var req struct {
 		Dest string `json:"destination"`
 	}
@@ -62,9 +68,13 @@ func (h *Api) createShortURL(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
+
+	h.metrics.HttpDuration.WithLabelValues("/").Observe(time.Since(start).Seconds())
+	h.metrics.HttpRequestsTotal.WithLabelValues("POST", "/").Inc()
 }
 
-func (h *Api) redirectToURL(w http.ResponseWriter, r *http.Request) {
+func (h *Api) get(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
 	vars := mux.Vars(r)
 	short := vars["short"]
 
@@ -81,4 +91,7 @@ func (h *Api) redirectToURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, u.Destination, http.StatusSeeOther)
+
+	h.metrics.HttpRequestsTotal.With(prometheus.Labels{"method": r.Method, "path": "/"}).Inc()
+	h.metrics.HttpDuration.With(prometheus.Labels{"path": "/"}).Observe(time.Since(start).Seconds())
 }
