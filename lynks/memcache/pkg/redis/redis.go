@@ -42,8 +42,6 @@ func (storage *Storage) Save(urlData Data) error {
 		return err
 	}
 
-	// сохраните другие данные urlData, если необходимо
-
 	return nil
 }
 
@@ -53,11 +51,8 @@ func (storage *Storage) Load(shortURL string) (Data, error) {
 		return Data{}, err
 	}
 
-	// Здесь нужно будет получить другие данные, если они сохраняются
-
 	return Data{
 		Short:       shortURL,
 		Destination: destURL,
-		// CreationTime: ..., // установите это, если сохраняете время создания
 	}, nil
 }
