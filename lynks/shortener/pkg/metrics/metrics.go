@@ -7,7 +7,7 @@ type Metrics struct {
 	HttpRequestsTotal *prometheus.CounterVec
 }
 
-func NewMetrics(reg prometheus.Registerer) *Metrics {
+func New(reg prometheus.Registerer) *Metrics {
 	m := &Metrics{
 		HttpDuration: prometheus.NewHistogramVec(prometheus.HistogramOpts{
 			Name: "http_response_duration_seconds",

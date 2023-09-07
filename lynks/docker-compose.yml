@@ -12,15 +12,15 @@ services:
     volumes:
       - db:/var/lib/postgresql/data
       - ./init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
-  # redis:
-  #   image: redis:latest
+  redis:
+    image: redis:latest
 
-  # memcache:
-  #   build: ./memcache
-  #   ports:
-  #     - "8081:8081"
-  #   depends_on:
-  #     - redis
+  memcache:
+    build: ./memcache
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
 
   shortener:
     build: ./shortener
